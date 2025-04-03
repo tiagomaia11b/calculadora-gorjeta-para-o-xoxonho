@@ -192,12 +192,12 @@ main {
     padding-block: 0.5rem;
 }
 
-.conta input::-webkit-inner-spin-button, 
-.pessoa input::-webkit-inner-spin-button,
-.gorjeta #outra::-webkit-inner-spin-button{
-    display: none;
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
-    
+ 
 @media(min-width :920px) {
     body{
         display: flex;
