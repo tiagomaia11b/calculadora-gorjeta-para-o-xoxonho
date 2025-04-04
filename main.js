@@ -1,95 +1,59 @@
-let conta = 0;
-let pessoas = 0;
-let porcentagem = 0;
-let botaoAtivo = null;
+let totalConta = 0;
+let qtdPessoas = 0;
+let percentualGorjeta = 0;
 
-const contaInput = document.querySelector("#conta");
-contaInput.addEventListener("input", receberValorConta);
+const campoConta = document.getElementById("conta");
+campoConta.oninput = function () {
+  totalConta = parseFloat(this.value) || 0;
+  calcularValores();
+};
 
-function receberValorConta(evento) {
-    conta = Number(evento.target.value) || 0;
-    calcular();
-}
+const campoPessoas = document.getElementById("pessoas");
+campoPessoas.oninput = function () {
+  const avisoErro = document.querySelector("#erro");
+  const divInput = this.parentElement;
 
-const pessoasInput = document.querySelector("#pessoas");
-pessoasInput.addEventListener("input", receberQuantidadePessoa);
+  if (this.value === "0") {
+    avisoErro.style.display = "block";
+    divInput.classList.add("erro");
+  } else {
+    avisoErro.style.display = "none";
+    divInput.classList.remove("erro");
+    qtdPessoas = parseInt(this.value) || 0;
+  }
 
-function receberQuantidadePessoa(evento) {
-    const paragrafoErro = document.querySelector(".pessoas #erro");
-    const divErro = document.querySelector(".pessoas .input-box");
+  calcularValores();
+};
 
-    if (evento.target.value === "0" || evento.target.value === "") {
-        paragrafoErro.style.display = "block";
-        divErro.setAttribute("id", "erro-div");
-    } else {
-        paragrafoErro.style.display = "none";
-        divErro.removeAttribute("id");
-        pessoas = Number(evento.target.value);
-    }
-    calcular();
-}
+const botoesPercentual = document.querySelectorAll(".gorjeta input[type='button']");
+botoesPercentual.forEach(btn => {
+  btn.onclick = function () {
+    botoesPercentual.forEach(b => b.classList.remove("selecionado"));
+    this.classList.add("selecionado");
 
-const botoesGorjeta = document.querySelectorAll(".gorjeta input[type='button']");
-
-botoesGorjeta.forEach(botao => {
-    botao.addEventListener("click", ReceberPorcentagem);
+    percentualGorjeta = parseInt(this.value) / 100;
+    document.getElementById("outra").value = "";
+    calcularValores();
+  };
 });
 
-function ReceberPorcentagem(evento) {
-    if (botaoAtivo) {
-        botaoAtivo.classList.remove("botao-ativo");
-    }
+const inputOutroPercentual = document.getElementById("outra");
+inputOutroPercentual.oninput = function () {
+  percentualGorjeta = parseFloat(this.value) / 100 || 0;
 
-    botaoAtivo = evento.target;
-    botaoAtivo.classList.add("botao-ativo");
+  botoesPercentual.forEach(b => b.classList.remove("selecionado"));
+  calcularValores();
+};
 
-    porcentagem = parseFloat(evento.target.value) / 100 || 0;
-    document.querySelector("#outra").value = "";
-    calcular();
+function calcularValores() {
+  if (totalConta > 0 && qtdPessoas > 0 && percentualGorjeta > 0) {
+    const valorGorjeta = (totalConta * percentualGorjeta) / qtdPessoas;
+    const valorTotal = (totalConta * (1 + percentualGorjeta)) / qtdPessoas;
+
+    const campoGorjeta = document.querySelector(".gorjeta-total > strong");
+    if (campoGorjeta) campoGorjeta.textContent = `R$ ${valorGorjeta.toFixed(2)}`;
+
+    const campoTotal = document.querySelector(".total > strong");
+    if (campoTotal) campoTotal.textContent = `R$ ${valorTotal.toFixed(2)}`;
+  }
 }
-
-const gorjetaInput = document.querySelector("#outra");
-gorjetaInput.addEventListener("input", ReceberPorcentagemManual);
-
-gorjetaInput.addEventListener("focus", () => {
-    if (botaoAtivo) {
-        botaoAtivo.classList.remove("botao-ativo");
-        botaoAtivo = null;
-    }
-});
-
-function ReceberPorcentagemManual(evento) {
-    porcentagem = parseFloat(evento.target.value) / 100 || 0;
-    calcular();
-}
-
-function calcular() {
-    const strongGorjetaTotal = document.querySelector(".gorjeta-total > strong");
-    const strongTotal = document.querySelector(".total > strong");
-
-    if (conta > 0 && porcentagem > 0 && pessoas > 0) {
-        const gorjetaPorPessoa = (conta * porcentagem) / pessoas;
-        const totalPorPessoa = (conta + conta * porcentagem) / pessoas;
-
-        strongGorjetaTotal.textContent = `R$ ${gorjetaPorPessoa.toFixed(2)}`;
-        strongTotal.textContent = `R$ ${totalPorPessoa.toFixed(2)}`;
-    } else {
-        strongGorjetaTotal.textContent = "R$ 0.00";
-        strongTotal.textContent = "R$ 0.00";
-    }
-}
-
-document.querySelector(".resultados button").addEventListener("click", () => {
-    conta = 0;
-    pessoas = 0;
-    porcentagem = 0;
-    botaoAtivo = null;
-
-    contaInput.value = "";
-    pessoasInput.value = "";
-    gorjetaInput.value = "";
-
-    botoesGorjeta.forEach(botao => botao.classList.remove("botao-ativo"));
-
-    calcular();
-});
